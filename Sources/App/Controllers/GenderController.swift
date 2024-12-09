@@ -20,10 +20,12 @@ struct GenderController: RouteCollection {
     }
 
     @Sendable func index(req: Request) async throws -> [Gender] {
+        print("Test")
         return try await Gender.query(on: req.db).all()
     }
 
     @Sendable func create(req: Request) async throws -> Gender {
+        print("Test01")
         let gender = try req.content.decode(Gender.self)
 
         try await gender.save(on: req.db)
@@ -31,6 +33,7 @@ struct GenderController: RouteCollection {
     }
 
     @Sendable func delete(req: Request) async throws -> HTTPStatus {
+        print("Test02")
         guard let gender = try await Gender.find(req.parameters.get("genderID"), on: req.db) else {
             throw Abort(.notFound)
         }

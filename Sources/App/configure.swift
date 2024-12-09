@@ -3,6 +3,7 @@ import Fluent
 import FluentMySQLDriver
 import Vapor
 import JWT
+import Gatekeeper
 
 // configures your application
 public func configure(_ app: Application) async throws {
@@ -26,6 +27,22 @@ public func configure(_ app: Application) async throws {
     let hmacKey = HMACKey(from: Data(secret.utf8))
     await app.jwt.keys.add(hmac: hmacKey, digestAlgorithm: .sha256)
 
+    let corsConfiguration = CORSMiddleware.Configuration(
+    allowedOrigin : .all,
+    allowedMethods: [.GET, .POST, .PUT, .DELETE, .OPTIONS],
+    allowedHeaders: [.accept, .authorization, .contentType, .origin],
+    cacheExpiration: 800
+    )
+    
+    let corsMiddleware = CORSMiddleware(configuration: corsConfiguration)
+    
+    app.caches.use(.memory)
+    app.gatekeeper.config = .init(maxRequests: 500, per: .minute)
+    
+    app.middleware.use(GatekeeperMiddleware())
+    app.middleware.use(corsMiddleware)
+//    app.middleware.use(JSONMiddleware())
+    
     // register routes
     try routes(app)
 }
