@@ -34,10 +34,16 @@ final class User: Model, @unchecked Sendable {
     
     @Field(key: "notification_time")
     var notificationTime: String
+    
+    @Field(key: "id_food_preference")
+    var idFoodPreference: UUID
+    
+    @Field(key: "id_gender")
+    var idGender: UUID
 
     init() { }
 
-    init(id: UUID? = nil, name: String, firstname: String, email: String, password: String, size: Double, birthday: Date, notificationTime: String) {
+    init(id: UUID? = nil, name: String, firstname: String, email: String, password: String, size: Double, birthday: Date, notificationTime: String, idFoodPreference: UUID, idGender: UUID) {
         self.id = id ?? UUID()
         self.name = name
         self.firstname = firstname
@@ -46,10 +52,12 @@ final class User: Model, @unchecked Sendable {
         self.size = size
         self.birthday = birthday
         self.notificationTime = notificationTime
+        self.idFoodPreference = idFoodPreference
+        self.idGender = idGender
     }
     
     func toDTO() -> UserDTO {
-        return UserDTO(id: self.id, name: self.name, firstname: self.firstname, email: self.email, size: self.size, birthday: self.birthday, notificationTime: self.notificationTime)
+        return UserDTO(id: self.id, name: self.name, firstname: self.firstname, email: self.email, size: self.size, birthday: self.birthday, notificationTime: self.notificationTime, idFoodPreference: self.idFoodPreference, idGender: self.idGender)
     }
 }
 

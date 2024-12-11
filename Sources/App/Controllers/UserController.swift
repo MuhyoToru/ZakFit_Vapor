@@ -32,6 +32,8 @@ struct UserController: RouteCollection {
     @Sendable func create(req: Request) async throws -> HTTPStatus {
         let user = try req.content.decode(User.self)
         
+        print(user)
+        
         user.password = try Bcrypt.hash(user.password)
         
         try await user.save(on: req.db)

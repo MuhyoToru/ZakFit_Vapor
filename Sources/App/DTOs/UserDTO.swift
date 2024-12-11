@@ -16,8 +16,10 @@ struct UserDTO: Content {
     let size: Double
     let birthday: Date
     let notificationTime: String
+    let idFoodPreference: UUID
+    let idGender: UUID
     
     func toModel() -> User {
-        return User(id: id, name: name, firstname: firstname, email: email, password: "default", size: size, birthday: birthday, notificationTime: notificationTime)
+        return User(id: id, name: name, firstname: firstname, email: email, password: "default", size: size, birthday: birthday, notificationTime: notificationTime, idFoodPreference: idFoodPreference, idGender: idGender)
     }
 }

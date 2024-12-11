@@ -21,11 +21,11 @@ final class UserWeight: Model, Content, @unchecked Sendable {
     var date: Date
     
     @Field(key: "id_user")
-    var idUser: UUID
+    var idUser: UUID?
     
     init() { }
 
-    init(id: UUID? = nil, weight: Double, date: Date, idUser: UUID) {
+    init(id: UUID? = nil, weight: Double, date: Date, idUser: UUID? = nil) {
         self.id = id ?? UUID()
         self.weight = weight
         self.date = date

@@ -12,8 +12,8 @@ struct UserWeightController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
         let userWeights = routes.grouped("userWeights")
 
-        userWeights.get(use: self.index)
-        userWeights.post(use: self.create)
+        userWeights.get(use: self.getByUserId)
+        userWeights.post("create", use: self.create)
         userWeights.group(":userWeightID") { userWeight in
             userWeight.delete(use: self.delete)
         }
@@ -25,6 +25,8 @@ struct UserWeightController: RouteCollection {
 
     @Sendable func create(req: Request) async throws -> UserWeight {
         let userWeight = try req.content.decode(UserWeight.self)
+        
+        userWeight.idUser = try await DecodeRequest().getIdFromJWT(req: req)
 
         try await userWeight.save(on: req.db)
         return userWeight
@@ -37,5 +39,13 @@ struct UserWeightController: RouteCollection {
 
         try await userWeight.delete(on: req.db)
         return .noContent
+    }
+    
+    @Sendable func getByUserId(req: Request) async throws -> [UserWeight] {
+        let idUser = try await DecodeRequest().getIdFromJWT(req: req)
+        
+        let userWeights = try await UserWeight.query(on: req.db).all().filter({$0.idUser == idUser})
+        
+        return userWeights
     }
 }
