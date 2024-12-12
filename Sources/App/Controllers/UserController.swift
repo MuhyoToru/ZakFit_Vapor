@@ -13,26 +13,17 @@ struct UserController: RouteCollection {
         let users = routes.grouped("users")
 
         users.post(use: self.create)
-        users.group(":userID") { user in
-            user.delete(use: self.delete)
-        }
         
         let authGroupBasic = users.grouped(User.authenticator(), User.guardMiddleware())
         authGroupBasic.get("login",use: login)
         
         let authGroupToken = users.grouped(TokenSession.authenticator(), TokenSession.guardMiddleware())
-        authGroupToken.get(use: index)
         authGroupToken.get("id", use: getById)
-    }
-
-    @Sendable func index(req: Request) async throws -> [UserDTO] {
-        return try await User.query(on: req.db).all().map { $0.toDTO() }
+        authGroupToken.post("update", use: update)
     }
     
     @Sendable func create(req: Request) async throws -> HTTPStatus {
         let user = try req.content.decode(User.self)
-        
-        print(user)
         
         user.password = try Bcrypt.hash(user.password)
         
@@ -62,5 +53,25 @@ struct UserController: RouteCollection {
         }
         
         return user.toDTO()
+    }
+    
+    @Sendable func update(req: Request) async throws -> HTTPStatus {
+        guard let user = try await User.find(DecodeRequest().getIdFromJWT(req: req), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        let updatedUser = try req.content.decode(UserDTO.self)
+        
+        user.name = updatedUser.name
+        user.firstname = updatedUser.firstname
+        user.email = updatedUser.email
+        user.notificationTime = updatedUser.notificationTime
+        user.birthday = updatedUser.birthday
+        user.size = updatedUser.size
+        user.idFoodPreference = updatedUser.idFoodPreference
+        user.idGender = updatedUser.idGender
+        
+        try await user.save(on: req.db)
+        return .ok
     }
 }

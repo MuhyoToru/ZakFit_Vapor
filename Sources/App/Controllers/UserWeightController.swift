@@ -12,11 +12,11 @@ struct UserWeightController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
         let userWeights = routes.grouped("userWeights")
 
-        userWeights.get(use: self.getByUserId)
-        userWeights.post("create", use: self.create)
-        userWeights.group(":userWeightID") { userWeight in
-            userWeight.delete(use: self.delete)
-        }
+        let authGroupToken = userWeights.grouped(TokenSession.authenticator(), TokenSession.guardMiddleware())
+        
+        authGroupToken.get(use: self.getByUserId)
+        authGroupToken.post("create", use: self.create)
+        authGroupToken.post("update", use: self.update)
     }
 
     @Sendable func index(req: Request) async throws -> [UserWeight] {
@@ -47,5 +47,20 @@ struct UserWeightController: RouteCollection {
         let userWeights = try await UserWeight.query(on: req.db).all().filter({$0.idUser == idUser})
         
         return userWeights
+    }
+    
+    @Sendable func update(req: Request) async throws -> HTTPStatus {
+        let updatedUserWeight = try req.content.decode(UserWeight.self)
+        
+        guard let userWeight = try await UserWeight.find(updatedUserWeight.id, on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+//        let updatedUserWeight = try req.content.decode(UserWeight.self)
+        
+        userWeight.weight = updatedUserWeight.weight
+        
+        try await userWeight.save(on: req.db)
+        return .ok
     }
 }
