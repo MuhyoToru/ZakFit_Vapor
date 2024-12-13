@@ -29,14 +29,18 @@ final class PhysicalActivity: Model, Content, @unchecked Sendable {
     @Field(key: "id_intensity")
     var idIntensity: UUID
     
+    @Field(key: "id_activity_type")
+    var idActivityType: UUID
+    
     init() { }
 
-    init(id: UUID? = nil, date: Date, duration: Double, caloriesBurned: Double, idUser: UUID, idIntensity: UUID) {
+    init(id: UUID? = nil, date: Date, duration: Double, caloriesBurned: Double, idUser: UUID, idIntensity: UUID, idActivityType: UUID) {
         self.id = id ?? UUID()
         self.date = date
         self.duration = duration
         self.caloriesBurned = caloriesBurned
         self.idUser = idUser
         self.idIntensity = idIntensity
+        self.idActivityType = idActivityType
     }
 }

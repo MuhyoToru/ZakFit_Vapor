@@ -20,6 +20,9 @@ public func configure(_ app: Application) async throws {
         database: Environment.get("DATABASE_NAME") ?? "zakFit_db"
     ), as: .mysql)
     
+    let fileMiddleware = FileMiddleware(publicDirectory: app.directory.publicDirectory)
+    app.middleware.use(fileMiddleware)
+    
     guard let secret = Environment.get("SECRET_KEY") else {
         fatalError("No SECRET_KEY environment variable set")
     }

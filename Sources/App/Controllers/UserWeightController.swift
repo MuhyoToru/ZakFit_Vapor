@@ -56,8 +56,6 @@ struct UserWeightController: RouteCollection {
             throw Abort(.notFound)
         }
         
-//        let updatedUserWeight = try req.content.decode(UserWeight.self)
-        
         userWeight.weight = updatedUserWeight.weight
         
         try await userWeight.save(on: req.db)
