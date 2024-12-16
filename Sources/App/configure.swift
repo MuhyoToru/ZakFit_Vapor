@@ -23,11 +23,8 @@ public func configure(_ app: Application) async throws {
     let fileMiddleware = FileMiddleware(publicDirectory: app.directory.publicDirectory)
     app.middleware.use(fileMiddleware)
     
-    guard let secret = Environment.get("SECRET_KEY") else {
-        fatalError("No SECRET_KEY environment variable set")
-    }
-    
-    let hmacKey = HMACKey(from: Data(secret.utf8))
+    let secretKey = "ZakFit_Secret_Key_00001"
+    let hmacKey = HMACKey(from: Data(secretKey.utf8))
     await app.jwt.keys.add(hmac: hmacKey, digestAlgorithm: .sha256)
 
     let corsConfiguration = CORSMiddleware.Configuration(

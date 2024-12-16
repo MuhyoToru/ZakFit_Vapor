@@ -17,6 +17,9 @@ final class Meal: Model, Content, @unchecked Sendable {
     @Field(key: "name")
     var name: String
     
+    @Field(key: "image")
+    var image: String
+    
     @Field(key: "date")
     var date: Date
 
@@ -40,9 +43,10 @@ final class Meal: Model, Content, @unchecked Sendable {
     
     init() { }
 
-    init(id: UUID? = nil, name: String, date: Date, totalCalories: Double, totalProteins: Double, totalCarbohydrates: Double, totalLipids: Double, idMealType: UUID, idUser: UUID) {
+    init(id: UUID? = nil, name: String, image: String, date: Date, totalCalories: Double, totalProteins: Double, totalCarbohydrates: Double, totalLipids: Double, idMealType: UUID, idUser: UUID) {
         self.id = id ?? UUID()
         self.name = name
+        self.image = image
         self.date = date
         self.totalCalories = totalCalories
         self.totalProteins = totalProteins
