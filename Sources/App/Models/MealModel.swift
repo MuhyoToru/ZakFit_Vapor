@@ -18,7 +18,7 @@ final class Meal: Model, Content, @unchecked Sendable {
     var name: String
     
     @Field(key: "image")
-    var image: String
+    var image: String?
     
     @Field(key: "date")
     var date: Date

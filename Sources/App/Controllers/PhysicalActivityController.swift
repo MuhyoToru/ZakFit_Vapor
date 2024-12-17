@@ -48,19 +48,19 @@ struct PhysicalActivityController: RouteCollection {
     }
     
     @Sendable func update(req: Request) async throws -> HTTPStatus {
-        let updatedPhysicalActivitys = try req.content.decode(PhysicalActivity.self)
+        let updatedPhysicalActivity = try req.content.decode(PhysicalActivity.self)
         
-        guard let physicalActivitys = try await PhysicalActivity.find(updatedPhysicalActivitys.id, on: req.db) else {
+        guard let physicalActivity = try await PhysicalActivity.find(updatedPhysicalActivity.id, on: req.db) else {
             throw Abort(.notFound)
         }
         
-        physicalActivitys.caloriesBurned = updatedPhysicalActivitys.caloriesBurned
-        physicalActivitys.date = updatedPhysicalActivitys.date
-        physicalActivitys.duration = updatedPhysicalActivitys.duration
-        physicalActivitys.idIntensity = updatedPhysicalActivitys.idIntensity
-        physicalActivitys.idActivityType = updatedPhysicalActivitys.idActivityType
+        physicalActivity.caloriesBurned = updatedPhysicalActivity.caloriesBurned
+        physicalActivity.date = updatedPhysicalActivity.date
+        physicalActivity.duration = updatedPhysicalActivity.duration
+        physicalActivity.idIntensity = updatedPhysicalActivity.idIntensity
+        physicalActivity.idActivityType = updatedPhysicalActivity.idActivityType
         
-        try await physicalActivitys.save(on: req.db)
+        try await physicalActivity.save(on: req.db)
         return .ok
     }
 }
