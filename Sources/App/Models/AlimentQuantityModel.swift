@@ -15,7 +15,7 @@ final class AlimentQuantity: Model, Content, @unchecked Sendable {
     var id: UUID?
 
     @Field(key: "quantity")
-    var quantity: Int
+    var quantity: Double
     
     @Field(key: "weight_or_unit")
     var weightOrUnit: String
@@ -25,7 +25,7 @@ final class AlimentQuantity: Model, Content, @unchecked Sendable {
 
     init() { }
 
-    init(id: UUID? = nil, quantity: Int, weightOrUnit: String, idAliment: UUID) {
+    init(id: UUID? = nil, quantity: Double, weightOrUnit: String, idAliment: UUID) {
         self.id = id ?? UUID()
         self.quantity = quantity
         self.weightOrUnit = weightOrUnit

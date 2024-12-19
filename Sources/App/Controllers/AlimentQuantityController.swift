@@ -16,19 +16,53 @@ struct AlimentQuantityController: RouteCollection {
         let authGroupToken = alimentQuantitys.grouped(TokenSession.authenticator(), TokenSession.guardMiddleware())
         
         authGroupToken.get(use: self.index)
-        authGroupToken.post("create", use: self.create)
         authGroupToken.get("idMeal",":idMeal", use: self.getByMealId)
+        authGroupToken.post("createWithIdMeal", ":idMeal", use: self.create)
+        authGroupToken.post("update", use: self.update)
     }
     
     @Sendable func index(req: Request) async throws -> [AlimentQuantity] {
         return try await AlimentQuantity.query(on: req.db).all()
     }
     
-    @Sendable func create(req: Request) async throws -> AlimentQuantity {
+    @Sendable func create(req: Request) async throws -> HTTPStatus {
+        guard let idMeal = req.parameters.get("idMeal") else {
+            throw Abort(.notFound)
+        }
+        
         let alimentQuantity = try req.content.decode(AlimentQuantity.self)
         
         try await alimentQuantity.save(on: req.db)
-        return alimentQuantity
+        
+        guard let _ = try await AlimentQuantity.find(UUID(uuidString : idMeal), on: req.db) else {
+            throw Abort(.notFound, reason: "Meal not create")
+        }
+        
+        if let sql = req.db as? SQLDatabase {
+            try await sql.raw("""
+                INSERT INTO aq_meal_links (id, id_meal, id_aliment_quantity)
+                VALUES (NULL, UNHEX(REPLACE(\(bind: idMeal), '-', '')), UNHEX(REPLACE(\(bind: String(alimentQuantity.id!)), '-', '')))
+            """).run()
+            
+            return .ok
+        }
+        
+        throw Abort(.internalServerError, reason: "La base de données n'est pas SQL.")
+    }
+    
+    @Sendable func update(req: Request) async throws -> HTTPStatus {
+        let updatedAlimentQuantity = try req.content.decode(AlimentQuantity.self)
+        
+        guard let alimentQuantity = try await AlimentQuantity.find(updatedAlimentQuantity.id, on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        alimentQuantity.quantity = updatedAlimentQuantity.quantity
+        alimentQuantity.weightOrUnit = updatedAlimentQuantity.weightOrUnit
+        alimentQuantity.idAliment = updatedAlimentQuantity.idAliment
+        
+        try await alimentQuantity.save(on: req.db)
+        return .ok
     }
     
     @Sendable func getByMealId(req: Request) async throws -> [AlimentQuantity] {
