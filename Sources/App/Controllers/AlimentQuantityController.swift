@@ -26,28 +26,12 @@ struct AlimentQuantityController: RouteCollection {
     }
     
     @Sendable func create(req: Request) async throws -> HTTPStatus {
-        guard let idMeal = req.parameters.get("idMeal") else {
-            throw Abort(.notFound)
-        }
-        
         let alimentQuantity = try req.content.decode(AlimentQuantity.self)
         
         try await alimentQuantity.save(on: req.db)
+        print("AlimentQuantity Create")
         
-        guard let _ = try await AlimentQuantity.find(UUID(uuidString : idMeal), on: req.db) else {
-            throw Abort(.notFound, reason: "Meal not create")
-        }
-        
-        if let sql = req.db as? SQLDatabase {
-            try await sql.raw("""
-                INSERT INTO aq_meal_links (id, id_meal, id_aliment_quantity)
-                VALUES (NULL, UNHEX(REPLACE(\(bind: idMeal), '-', '')), UNHEX(REPLACE(\(bind: String(alimentQuantity.id!)), '-', '')))
-            """).run()
-            
-            return .ok
-        }
-        
-        throw Abort(.internalServerError, reason: "La base de données n'est pas SQL.")
+        return .ok
     }
     
     @Sendable func update(req: Request) async throws -> HTTPStatus {

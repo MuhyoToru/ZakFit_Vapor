@@ -17,6 +17,7 @@ struct PhysicalActivityController: RouteCollection {
         authGroupToken.get(use: self.getByUserId)
         authGroupToken.post("create", use: self.create)
         authGroupToken.post("update", use: self.update)
+        authGroupToken.get("delete", ":idPhysicalActivity", use: self.delete)
     }
 
     @Sendable func index(req: Request) async throws -> [PhysicalActivity] {
@@ -31,12 +32,12 @@ struct PhysicalActivityController: RouteCollection {
     }
 
     @Sendable func delete(req: Request) async throws -> HTTPStatus {
-        guard let physicalActivity = try await PhysicalActivity.find(req.parameters.get("physicalActivityID"), on: req.db) else {
+        guard let physicalActivity = try await PhysicalActivity.find(req.parameters.get("idPhysicalActivity"), on: req.db) else {
             throw Abort(.notFound)
         }
 
         try await physicalActivity.delete(on: req.db)
-        return .noContent
+        return .ok
     }
     
     @Sendable func getByUserId(req: Request) async throws -> [PhysicalActivity] {

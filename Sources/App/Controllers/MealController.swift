@@ -6,6 +6,7 @@
 //
 
 import Fluent
+import FluentSQL
 import Vapor
 
 struct MealController: RouteCollection {
@@ -17,26 +18,62 @@ struct MealController: RouteCollection {
         authGroupToken.get(use: self.getByUserId)
         authGroupToken.post("create", use: self.create)
         authGroupToken.post("update", use: self.update)
+        authGroupToken.get("delete", ":idMeal", use: self.delete)
     }
 
     @Sendable func index(req: Request) async throws -> [Meal] {
         return try await Meal.query(on: req.db).all()
     }
 
-    @Sendable func create(req: Request) async throws -> Meal {
+    @Sendable func create(req: Request) async throws -> HTTPStatus {
         let meal = try req.content.decode(Meal.self)
 
         try await meal.save(on: req.db)
-        return meal
+        print("Meal Create")
+        
+        return .ok
     }
 
     @Sendable func delete(req: Request) async throws -> HTTPStatus {
-        guard let meal = try await Meal.find(req.parameters.get("mealID"), on: req.db) else {
+        var alimentQuantitys : [AlimentQuantity] = []
+        var aqMealLinks : [AQMealLink] = []
+        
+        
+        guard let idMeal = req.parameters.get("idMeal") else {
             throw Abort(.notFound)
         }
-
+        
+        guard let meal = try await Meal.find(UUID(uuidString: idMeal), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        if let sql = req.db as? SQLDatabase {
+            alimentQuantitys = try await sql.raw("""
+                SELECT aliment_quantitys.* 
+                FROM aliment_quantitys
+                JOIN aq_meal_links ON aliment_quantitys.id = aq_meal_links.id_aliment_quantity
+                JOIN meals ON aq_meal_links.id_meal = meals.id
+                WHERE meals.id = UNHEX(REPLACE(\(bind: idMeal), '-', ''))
+            """).all(decodingFluent: AlimentQuantity.self)
+            
+            aqMealLinks = try await sql.raw("""
+                SELECT aq_meal_links.* 
+                FROM aq_meal_links
+                JOIN meals ON aq_meal_links.id_meal = meals.id
+                WHERE meals.id = UNHEX(REPLACE(\(bind: idMeal), '-', ''))
+            """).all(decodingFluent: AQMealLink.self)
+        }
+        
+        for aqMealLink in aqMealLinks {
+            try await aqMealLink.delete(on: req.db)
+        }
+        
+        for alimentQuantity in alimentQuantitys {
+            try await alimentQuantity.delete(on: req.db)
+        }
+        
         try await meal.delete(on: req.db)
-        return .noContent
+        return .ok
     }
     
     @Sendable func getByUserId(req: Request) async throws -> [Meal] {

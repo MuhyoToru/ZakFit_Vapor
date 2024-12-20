@@ -27,4 +27,5 @@ func routes(_ app: Application) throws {
     try app.register(collection: UserController())
     try app.register(collection: UserWeightController())
     try app.register(collection: WeightGoalController())
+    try app.register(collection: AQMealLinkController())
 }

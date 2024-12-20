@@ -23,7 +23,7 @@ final class AQMealLink: Model, Content, @unchecked Sendable {
     init() { }
 
     init(id: UUID? = nil, idMeal: UUID, idAlimentQuantity: UUID) {
-        self.id = id
+        self.id = id ?? UUID()
         self.idMeal = idMeal
         self.idAlimentQuantity = idAlimentQuantity
     }
