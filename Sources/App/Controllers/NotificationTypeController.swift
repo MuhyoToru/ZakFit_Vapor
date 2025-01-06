@@ -12,9 +12,11 @@ struct NotificationTypeController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
         let notificationTypes = routes.grouped("notificationTypes")
 
-        notificationTypes.get(use: self.index)
-        notificationTypes.post(use: self.create)
-        notificationTypes.group(":notificationsTypeID") { notificationType in
+        let authGroupToken = notificationTypes.grouped(TokenSession.authenticator(), TokenSession.guardMiddleware())
+        
+        authGroupToken.get(use: self.index)
+        authGroupToken.post(use: self.create)
+        authGroupToken.group(":notificationsTypeID") { notificationType in
             notificationType.delete(use: self.delete)
         }
     }

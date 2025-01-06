@@ -12,9 +12,11 @@ struct PhysicalActivityGoalController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
         let physicalActivityGoals = routes.grouped("physicalActivityGoals")
 
-        physicalActivityGoals.get(use: self.index)
-        physicalActivityGoals.post(use: self.create)
-        physicalActivityGoals.group(":physicalActivityGoalID") { physicalActivityGoal in
+        let authGroupToken = physicalActivityGoals.grouped(TokenSession.authenticator(), TokenSession.guardMiddleware())
+        
+        authGroupToken.get(use: self.index)
+        authGroupToken.post(use: self.create)
+        authGroupToken.group(":physicalActivityGoalID") { physicalActivityGoal in
             physicalActivityGoal.delete(use: self.delete)
         }
     }

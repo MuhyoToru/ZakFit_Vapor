@@ -15,6 +15,7 @@ struct PhysicalActivityController: RouteCollection {
         let authGroupToken = physicalActivitys.grouped(TokenSession.authenticator(), TokenSession.guardMiddleware())
         
         authGroupToken.get(use: self.getByUserId)
+        authGroupToken.get(":idPhysicalActivity", use: self.getOne)
         authGroupToken.post("create", use: self.create)
         authGroupToken.post("update", use: self.update)
         authGroupToken.get("delete", ":idPhysicalActivity", use: self.delete)
@@ -46,6 +47,14 @@ struct PhysicalActivityController: RouteCollection {
         let physicalActivitys = try await PhysicalActivity.query(on: req.db).all().filter({$0.idUser == idUser})
         
         return physicalActivitys
+    }
+    
+    @Sendable func getOne(req: Request) async throws -> PhysicalActivity {
+        guard let physicalActivity = try await PhysicalActivity.find(req.parameters.get("idPhysicalActivity"), on: req.db) else {
+            throw Abort(.notFound)
+        }
+        
+        return physicalActivity
     }
     
     @Sendable func update(req: Request) async throws -> HTTPStatus {

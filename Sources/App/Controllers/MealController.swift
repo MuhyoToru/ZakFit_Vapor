@@ -115,6 +115,8 @@ struct MealController: RouteCollection {
             if meal.date.ISO8601Format().split(separator: "T").first! == date {
                 filteredMeals.append(meal)
             }
+            
+            print("\(meals) ---> \(meal.date.ISO8601Format().split(separator: "T").first!) = \(date) ? \(meal.date.ISO8601Format().split(separator: "T").first! == date) ---> \(filteredMeals)")
         }
         
         return filteredMeals

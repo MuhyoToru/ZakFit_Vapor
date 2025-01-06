@@ -11,10 +11,12 @@ import Vapor
 struct CaloriesGoalController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
         let caloriesGoals = routes.grouped("caloriesGoals")
+        
+        let authGroupToken = caloriesGoals.grouped(TokenSession.authenticator(), TokenSession.guardMiddleware())
 
-        caloriesGoals.get(use: self.index)
-        caloriesGoals.post(use: self.create)
-        caloriesGoals.group(":caloriesGoalID") { caloriesGoal in
+        authGroupToken.get(use: self.index)
+        authGroupToken.post(use: self.create)
+        authGroupToken.group(":caloriesGoalID") { caloriesGoal in
             caloriesGoal.delete(use: self.delete)
         }
     }
